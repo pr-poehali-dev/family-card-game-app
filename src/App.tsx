@@ -89,51 +89,43 @@ function GeometricBg() {
 function HomeScreen({ onNav }: { onNav: (t: Tab) => void }) {
   return (
     <div className="flex flex-col h-full px-5 pt-10 pb-4 animate-fade-in">
-      <div className="mb-8">
-        <p className="text-xs font-golos uppercase tracking-widest mb-2" style={{ color: "#999" }}>Семейная игра</p>
-        <h1 className="font-unbounded text-2xl font-black leading-tight text-foreground">
-          Не все<br />
-          <span style={{ background: `linear-gradient(90deg, ${BRAND.red}, ${BRAND.blue})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            Дома
-          </span>
+      <div className="mb-6">
+        <p className="font-golos text-xs uppercase tracking-widest mb-1" style={{ color: "#999" }}>Добро пожаловать</p>
+        <h1 className="font-unbounded font-black leading-[1.05]" style={{ fontSize: "2.6rem", color: "#111" }}>
+          НЕ ВСЕ<br />ДОМА
         </h1>
       </div>
 
       {/* Hero */}
-      <div className="relative rounded-3xl p-5 mb-6 overflow-hidden animate-pulse-glow"
-        style={{ background: `linear-gradient(135deg, ${BRAND.red}18 0%, ${BRAND.blue}12 100%)`, border: `1.5px solid ${BRAND.red}30` }}>
-        <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full" style={{ background: `${BRAND.red}12` }} />
-        <div className="absolute bottom-0 right-0 w-20 h-20 opacity-15">
-          <svg viewBox="0 0 80 80"><polygon points="40,5 75,70 5,70" fill={BRAND.blue} /></svg>
-        </div>
-        <p className="text-xs font-golos mb-1 font-medium" style={{ color: BRAND.red }}>Сегодня · 21 марта 2026</p>
-        <p className="font-unbounded text-lg font-bold text-foreground mb-1">Суббота!</p>
-        <p className="text-sm font-golos mb-4" style={{ color: "#555" }}>Отличный день для игры с семьёй</p>
+      <div className="rounded-2xl p-5 mb-6"
+        style={{ border: "1.5px solid #ddd", background: "#fff", boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+        <p className="font-golos text-sm mb-1" style={{ color: "#777" }}>Сегодня 21 марта 2026</p>
+        <p className="font-golos font-bold text-xl mb-1 text-foreground">Суббота!</p>
+        <p className="font-golos text-sm mb-4" style={{ color: "#777" }}>Отличный день для игры с семьёй</p>
         <button onClick={() => onNav("cards")}
-          className="px-5 py-2.5 rounded-2xl text-sm font-golos font-bold text-white active:scale-95 transition-transform"
-          style={{ background: BRAND.red }}>
-          Начать игру →
+          className="px-6 py-2.5 rounded-2xl font-golos font-semibold text-sm text-white active:scale-95 transition-transform"
+          style={{ background: BRAND.blue }}>
+          Начать игру
         </button>
       </div>
 
       {/* Grid */}
-      <p className="text-xs font-golos uppercase tracking-widest mb-3" style={{ color: "#999" }}>Разделы</p>
+      <p className="font-golos text-sm font-bold uppercase tracking-widest mb-3" style={{ color: "#111" }}>Разделы</p>
       <div className="grid grid-cols-2 gap-3">
         {[
-          { tab: "mood" as Tab, icon: "Heart", label: "Настроение", sub: "Как ты сегодня?", color: BRAND.purple },
-          { tab: "cards" as Tab, icon: "Layers", label: "Карточки", sub: "Вопросы для семьи", color: BRAND.red },
-          { tab: "events" as Tab, icon: "CalendarDays", label: "События", sub: "Планы и мероприятия", color: BRAND.blue },
-          { tab: "mood" as Tab, icon: "TrendingUp", label: "Статистика", sub: "История настроений", color: BRAND.amber },
+          { tab: "mood" as Tab, icon: "BarChart2", label: "Настроение", sub: "История настроений", bg: BRAND.blue },
+          { tab: "cards" as Tab, icon: "Layers", label: "Карточки", sub: "Вопросы для семьи", bg: BRAND.purple },
+          { tab: "events" as Tab, icon: "CalendarDays", label: "События", sub: "Планы и мероприятия", bg: BRAND.amber },
+          { tab: "home" as Tab, icon: "Users", label: "Профиль", sub: "Участники игры", bg: BRAND.red },
         ].map((item) => (
           <button key={item.label} onClick={() => onNav(item.tab)}
             className="rounded-2xl p-4 text-left active:scale-95 transition-transform"
-            style={{ background: `${item.color}12`, border: `1.5px solid ${item.color}30` }}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-2.5"
-              style={{ background: `${item.color}20` }}>
-              <Icon name={item.icon} size={18} style={{ color: item.color }} />
+            style={{ background: item.bg }}>
+            <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center mb-8">
+              <Icon name={item.icon} size={16} className="text-white" />
             </div>
-            <p className="font-golos font-semibold text-sm text-foreground">{item.label}</p>
-            <p className="font-golos text-xs mt-0.5" style={{ color: "#888" }}>{item.sub}</p>
+            <p className="font-golos font-bold text-sm text-white">{item.label}</p>
+            <p className="font-golos text-xs mt-0.5 text-white/75">{item.sub}</p>
           </button>
         ))}
       </div>
