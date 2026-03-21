@@ -85,11 +85,11 @@ function HomeScreen({ onNav }: { onNav: (t: Tab) => void }) {
   return (
     <div className="flex flex-col h-full px-5 pt-10 pb-4 animate-fade-in">
       <div className="mb-8">
-        <p className="text-xs font-golos text-muted-foreground uppercase tracking-widest mb-2">Добро пожаловать</p>
+        <p className="text-xs font-golos text-muted-foreground uppercase tracking-widest mb-2">Семейная игра</p>
         <h1 className="font-unbounded text-2xl font-black leading-tight">
-          Семейный<br />
+          Не все<br />
           <span style={{ background: "linear-gradient(90deg, hsl(262 80% 70%), hsl(188 90% 60%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            Play Hub
+            Дома
           </span>
         </h1>
       </div>
