@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
-type Tab = "home" | "mood" | "cards" | "events";
+type Tab = "home" | "mood" | "cards" | "events" | "profile";
 type Mood = "amazing" | "good" | "okay" | "bad" | "awful";
 type MoodEntry = { mood: Mood; note: string };
 
@@ -445,12 +445,93 @@ function EventsScreen() {
   );
 }
 
+// ─── ProfileScreen ───────────────────────────────────────────────────────────
+const FAMILY_MEMBERS = [
+  { name: "Мама", role: "Организатор", emoji: "👩", color: BRAND.red },
+  { name: "Папа", role: "Участник", emoji: "👨", color: BRAND.blue },
+  { name: "Аня", role: "Участник", emoji: "👧", color: BRAND.purple },
+  { name: "Миша", role: "Участник", emoji: "👦", color: BRAND.amber },
+];
+
+function ProfileScreen() {
+  return (
+    <div className="flex flex-col h-full px-5 pt-10 pb-4 animate-fade-in">
+      {/* Заголовок */}
+      <div className="mb-6">
+        <p className="font-golos text-xs uppercase tracking-widest mb-1" style={{ color: "#999" }}>Аккаунт</p>
+        <h2 className="font-unbounded text-xl font-bold text-foreground">Профиль</h2>
+      </div>
+
+      {/* Карточка профиля */}
+      <div className="rounded-2xl p-5 mb-5 flex items-center gap-4"
+        style={{ background: BRAND.red }}>
+        <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-3xl flex-shrink-0">
+          👩
+        </div>
+        <div className="flex-1">
+          <p className="font-unbounded font-bold text-white text-lg leading-tight">Мама</p>
+          <p className="font-golos text-sm text-white/70 mt-0.5">Организатор игры</p>
+        </div>
+        <button className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center active:scale-90 transition-transform">
+          <Icon name="Pencil" size={16} className="text-white" />
+        </button>
+      </div>
+
+      {/* Статистика */}
+      <div className="grid grid-cols-3 gap-2 mb-5">
+        {[
+          { label: "Игр", value: "24" },
+          { label: "Дней", value: "18" },
+          { label: "Событий", value: "7" },
+        ].map(s => (
+          <div key={s.label} className="rounded-2xl p-3 text-center"
+            style={{ background: "#f5f5f5", border: "1.5px solid #eee" }}>
+            <p className="font-unbounded font-black text-xl" style={{ color: "#111" }}>{s.value}</p>
+            <p className="font-golos text-xs mt-0.5" style={{ color: "#999" }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Члены семьи */}
+      <p className="font-golos text-sm font-bold uppercase tracking-widest mb-3" style={{ color: "#111" }}>Моя семья</p>
+      <div className="space-y-2 flex-1">
+        {FAMILY_MEMBERS.map((m, i) => (
+          <div key={m.name}
+            className="flex items-center gap-3 rounded-2xl px-4 py-3 animate-slide-up"
+            style={{ background: "#fff", border: "1.5px solid #e8e8e8", animationDelay: `${i * 60}ms` }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+              style={{ background: `${m.color}15` }}>
+              {m.emoji}
+            </div>
+            <div className="flex-1">
+              <p className="font-golos font-semibold text-sm text-foreground">{m.name}</p>
+              <p className="font-golos text-xs" style={{ color: "#aaa" }}>{m.role}</p>
+            </div>
+            <div className="w-2 h-2 rounded-full" style={{ background: m.color }} />
+          </div>
+        ))}
+
+        {/* Добавить */}
+        <button className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 active:scale-95 transition-transform"
+          style={{ border: "1.5px dashed #ddd", background: "transparent" }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: "#f5f5f5" }}>
+            <Icon name="Plus" size={18} style={{ color: "#bbb" }} />
+          </div>
+          <p className="font-golos text-sm font-medium" style={{ color: "#bbb" }}>Добавить участника</p>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── BottomNav ────────────────────────────────────────────────────────────────
 const NAV_ITEMS: { tab: Tab; icon: string; label: string }[] = [
   { tab: "home", icon: "Home", label: "Главная" },
   { tab: "mood", icon: "Heart", label: "Настроение" },
   { tab: "cards", icon: "Layers", label: "Карточки" },
   { tab: "events", icon: "CalendarDays", label: "События" },
+  { tab: "profile", icon: "User", label: "Профиль" },
 ];
 
 function BottomNav({ active, onNav }: { active: Tab; onNav: (t: Tab) => void }) {
@@ -488,6 +569,7 @@ export default function App() {
     mood: <MoodScreen />,
     cards: <CardsScreen />,
     events: <EventsScreen />,
+    profile: <ProfileScreen />,
   }[tab];
 
   return (
