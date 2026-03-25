@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 
-type Tab = "home" | "mood" | "cards" | "events" | "profile";
+const GALLERY_URL = "https://functions.poehali.dev/29710396-7cb4-4f41-bdea-1b6da92238a4";
+
+type Tab = "home" | "mood" | "cards" | "events" | "gallery" | "profile";
 type Mood = "amazing" | "good" | "okay" | "bad" | "awful";
 type MoodEntry = { mood: Mood; note: string };
 
@@ -617,12 +619,197 @@ function ProfileScreen() {
   );
 }
 
+// ─── GalleryScreen ────────────────────────────────────────────────────────────
+type Photo = { id: number; url: string; caption: string; uploadedAt: string };
+
+function GalleryScreen() {
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [caption, setCaption] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [fileData, setFileData] = useState<{ b64: string; type: string; name: string } | null>(null);
+  const [lightbox, setLightbox] = useState<Photo | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const loadPhotos = () => {
+    setLoading(true);
+    fetch(GALLERY_URL)
+      .then(r => r.json())
+      .then(d => { setPhotos(d.photos || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  };
+
+  useEffect(() => { loadPhotos(); }, []);
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const result = ev.target?.result as string;
+      const b64 = result.split(",")[1];
+      setFileData({ b64, type: file.type, name: file.name });
+      setPreview(result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const upload = async () => {
+    if (!fileData) return;
+    setUploading(true);
+    await fetch(GALLERY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: fileData.b64, contentType: fileData.type, filename: fileData.name, caption }),
+    });
+    setUploading(false);
+    setShowForm(false);
+    setPreview(null);
+    setFileData(null);
+    setCaption("");
+    loadPhotos();
+  };
+
+  const deletePhoto = async (id: number) => {
+    await fetch(GALLERY_URL, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setLightbox(null);
+    loadPhotos();
+  };
+
+  return (
+    <div className="flex flex-col h-full px-5 pt-10 pb-4 animate-fade-in">
+      {/* Заголовок */}
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <p className="font-golos text-xs mb-0.5" style={{ color: "#999" }}>Семья</p>
+          <h2 className="font-golos font-black text-3xl text-foreground">Галерея</h2>
+        </div>
+        <button onClick={() => setShowForm(s => !s)}
+          className="w-12 h-12 rounded-2xl flex items-center justify-center text-white active:scale-90 transition-transform mt-1"
+          style={{ background: BRAND.purple }}>
+          <Icon name={showForm ? "X" : "Plus"} size={22} />
+        </button>
+      </div>
+
+      {/* Форма загрузки */}
+      {showForm && (
+        <div className="rounded-2xl p-4 mb-4 animate-scale-in"
+          style={{ background: "#fff", border: "1.5px solid #e8e8e8", boxShadow: "0 2px 16px rgba(0,0,0,0.06)" }}>
+
+          {/* Зона выбора файла */}
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+          {preview ? (
+            <div className="relative mb-3">
+              <img src={preview} alt="preview" className="w-full rounded-xl object-cover" style={{ maxHeight: "160px" }} />
+              <button onClick={() => { setPreview(null); setFileData(null); }}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center">
+                <Icon name="X" size={14} className="text-white" />
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => fileRef.current?.click()}
+              className="w-full rounded-xl py-8 mb-3 flex flex-col items-center gap-2 active:scale-95 transition-transform"
+              style={{ border: "2px dashed #ddd", background: "#fafafa" }}>
+              <Icon name="ImagePlus" size={28} style={{ color: "#ccc" }} />
+              <span className="font-golos text-sm" style={{ color: "#bbb" }}>Нажмите чтобы выбрать фото</span>
+            </button>
+          )}
+
+          <input value={caption} onChange={e => setCaption(e.target.value)}
+            placeholder="Подпись к фото (необязательно)"
+            className="w-full rounded-xl px-3 py-2.5 text-sm font-golos mb-3 outline-none"
+            style={{ background: "#f7f7f7", border: "1.5px solid #e0e0e0", color: "#111" }} />
+
+          <div className="flex gap-2">
+            <button onClick={() => { setShowForm(false); setPreview(null); setFileData(null); setCaption(""); }}
+              className="flex-1 py-2.5 rounded-xl text-sm font-golos font-bold"
+              style={{ background: "#f0f0f0", color: "#555" }}>
+              Отмена
+            </button>
+            <button onClick={upload} disabled={!fileData || uploading}
+              className="flex-1 py-2.5 rounded-xl text-sm font-golos font-bold text-white transition-opacity"
+              style={{ background: BRAND.purple, opacity: (!fileData || uploading) ? 0.5 : 1 }}>
+              {uploading ? "Загружаю..." : "Загрузить"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Сетка фото */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
+              style={{ borderColor: `${BRAND.purple} transparent transparent transparent` }} />
+          </div>
+        ) : photos.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-2xl mb-4 flex items-center justify-center"
+              style={{ background: `${BRAND.purple}12`, border: `1.5px solid ${BRAND.purple}25` }}>
+              <Icon name="Images" size={28} style={{ color: BRAND.purple }} />
+            </div>
+            <p className="font-golos font-semibold text-foreground mb-1">Пока нет фото</p>
+            <p className="text-sm font-golos" style={{ color: "#aaa" }}>Нажмите + чтобы добавить первый момент</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-1.5 pb-2">
+            {photos.map((p, i) => (
+              <button key={p.id} onClick={() => setLightbox(p)}
+                className="aspect-square rounded-xl overflow-hidden active:scale-95 transition-transform animate-fade-in"
+                style={{ animationDelay: `${i * 40}ms` }}>
+                <img src={p.url} alt={p.caption} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Лайтбокс */}
+      {lightbox && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center animate-fade-in"
+          style={{ background: "rgba(0,0,0,0.85)" }}
+          onClick={() => setLightbox(null)}>
+          <div onClick={e => e.stopPropagation()} className="w-full max-w-sm px-4 flex flex-col gap-3">
+            <img src={lightbox.url} alt={lightbox.caption}
+              className="w-full rounded-2xl object-contain" style={{ maxHeight: "65vh" }} />
+            {lightbox.caption && (
+              <p className="font-golos text-white text-center text-sm">{lightbox.caption}</p>
+            )}
+            <p className="font-golos text-center text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+              {new Date(lightbox.uploadedAt).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setLightbox(null)}
+                className="flex-1 py-3 rounded-2xl font-golos font-bold text-sm"
+                style={{ background: "rgba(255,255,255,0.15)", color: "#fff" }}>
+                Закрыть
+              </button>
+              <button onClick={() => deletePhoto(lightbox.id)}
+                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: BRAND.red }}>
+                <Icon name="Trash2" size={18} className="text-white" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── BottomNav ────────────────────────────────────────────────────────────────
 const NAV_ITEMS: { tab: Tab; icon: string; label: string }[] = [
   { tab: "home", icon: "Home", label: "Главная" },
   { tab: "mood", icon: "Heart", label: "Настроение" },
   { tab: "cards", icon: "Layers", label: "Карточки" },
   { tab: "events", icon: "CalendarDays", label: "События" },
+  { tab: "gallery", icon: "Images", label: "Галерея" },
   { tab: "profile", icon: "User", label: "Профиль" },
 ];
 
@@ -636,12 +823,11 @@ function BottomNav({ active, onNav }: { active: Tab; onNav: (t: Tab) => void }) 
           const isActive = active === item.tab;
           return (
             <button key={item.tab} onClick={() => onNav(item.tab)}
-              className="nav-pill flex-1 flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl transition-all"
+              className="nav-pill flex-1 flex flex-col items-center gap-0.5 py-1.5 px-0.5 rounded-xl transition-all"
               style={isActive ? { background: `${BRAND.red}12`, border: `1.5px solid ${BRAND.red}25` } : {}}>
-              <Icon name={item.icon} size={20}
+              <Icon name={item.icon} size={18}
                 style={{ color: isActive ? BRAND.red : "#bbb" }} />
-              <span className="text-xs font-golos"
-                style={{ color: isActive ? "#111" : "#bbb", fontWeight: isActive ? 600 : 400 }}>
+              <span className="font-golos" style={{ fontSize: "9px", color: isActive ? "#111" : "#bbb", fontWeight: isActive ? 600 : 400 }}>
                 {item.label}
               </span>
             </button>
@@ -661,6 +847,7 @@ export default function App() {
     mood: <MoodScreen />,
     cards: <CardsScreen />,
     events: <EventsScreen />,
+    gallery: <GalleryScreen />,
     profile: <ProfileScreen />,
   }[tab];
 
