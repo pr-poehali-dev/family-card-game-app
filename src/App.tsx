@@ -617,6 +617,163 @@ function ProfileScreen() {
   );
 }
 
+// ─── OnboardingScreen ─────────────────────────────────────────────────────────
+const ONBOARDING_SLIDES = [
+  {
+    id: 0,
+    title: "ОТОРВИ\nОТЦА\nОТ ЭКРАНА",
+    sub: "Игры и вопросы, которые соберут всю семью за одним столом",
+    bg: "#fff",
+    shapes: (
+      <svg viewBox="0 0 280 320" className="w-full h-full" style={{ display: "block" }}>
+        {/* Красный круг — фон */}
+        <circle cx="160" cy="200" r="90" fill={BRAND.red} />
+        {/* Усы */}
+        <ellipse cx="130" cy="205" rx="38" ry="14" fill="#222" transform="rotate(-10 130 205)" />
+        <ellipse cx="190" cy="205" rx="38" ry="14" fill="#222" transform="rotate(10 190 205)" />
+        {/* Скейтборд */}
+        <rect x="110" y="240" width="80" height="10" rx="5" fill="#333" />
+        <circle cx="122" cy="252" r="6" fill="#555" />
+        <circle cx="178" cy="252" r="6" fill="#555" />
+        {/* Телефон */}
+        <rect x="60" y="230" width="42" height="60" rx="8" fill="#b61834" />
+        <rect x="66" y="238" width="30" height="38" rx="4" fill="#fff" opacity="0.3" />
+        <rect x="72" y="282" width="18" height="4" rx="2" fill="#fff" opacity="0.5" />
+      </svg>
+    ),
+  },
+  {
+    id: 1,
+    title: "ПОДЕЛИСЬ\nСВОИМ\nНАСТРОЕНИЕМ",
+    sub: "Отмечай настроение каждый день и следи за общей атмосферой в семье",
+    bg: "#fff",
+    shapes: (
+      <svg viewBox="0 0 280 320" className="w-full h-full" style={{ display: "block" }}>
+        {/* Жёлтый треугольник */}
+        <polygon points="60,280 130,160 200,280" fill={BRAND.amber} />
+        {/* Синий круг */}
+        <circle cx="195" cy="210" r="48" fill={BRAND.blue} />
+        {/* Розовый шестиугольник */}
+        <polygon points="110,290 80,270 80,240 110,220 140,240 140,270" fill={BRAND.purple} />
+        {/* Красный квадрат повёрнутый */}
+        <rect x="30" y="240" width="55" height="55" rx="6" fill={BRAND.red} transform="rotate(15 57 267)" />
+      </svg>
+    ),
+  },
+  {
+    id: 2,
+    title: "ЗАГРУЗИ\nПАМЯТНЫЕ\nМОМЕНТЫ",
+    sub: "Планируйте события, карточки с вопросами и семейные вечера вместе",
+    bg: "#fff",
+    shapes: (
+      <svg viewBox="0 0 280 320" className="w-full h-full" style={{ display: "block" }}>
+        {/* Красный прямоугольник-тело */}
+        <rect x="100" y="160" width="120" height="120" rx="10" fill={BRAND.red} />
+        {/* Жёлтый треугольник */}
+        <polygon points="80,280 140,170 200,280" fill={BRAND.amber} />
+        {/* Ножки */}
+        <line x1="130" y1="280" x2="120" y2="310" stroke="#333" strokeWidth="5" strokeLinecap="round" />
+        <line x1="150" y1="280" x2="148" y2="312" stroke="#333" strokeWidth="5" strokeLinecap="round" />
+        <line x1="170" y1="280" x2="178" y2="310" stroke="#333" strokeWidth="5" strokeLinecap="round" />
+        <line x1="190" y1="280" x2="195" y2="312" stroke="#333" strokeWidth="5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+];
+
+function OnboardingScreen({ onDone }: { onDone: () => void }) {
+  const [idx, setIdx] = useState(0);
+  const [exiting, setExiting] = useState(false);
+  const slide = ONBOARDING_SLIDES[idx];
+  const isLast = idx === ONBOARDING_SLIDES.length - 1;
+
+  const next = () => {
+    if (isLast) { onDone(); return; }
+    setExiting(true);
+    setTimeout(() => { setIdx(i => i + 1); setExiting(false); }, 220);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-6 py-10 animate-fade-in"
+      style={{ background: "#f7f7f7" }}>
+
+      {/* Карточка-виджет */}
+      <div
+        className="w-full rounded-3xl overflow-hidden flex flex-col transition-all"
+        style={{
+          background: "#fff",
+          border: "1.5px solid #e0e0e0",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.10)",
+          maxWidth: "280px",
+          opacity: exiting ? 0 : 1,
+          transform: exiting ? "translateX(-24px) scale(0.97)" : "none",
+          transition: "opacity 0.2s ease, transform 0.2s ease",
+        }}>
+
+        {/* Текст сверху */}
+        <div className="px-6 pt-7 pb-4">
+          <h2 className="font-unbounded font-black text-2xl leading-tight text-foreground whitespace-pre-line">
+            {slide.title}
+          </h2>
+          {/* Кнопка-стрелка */}
+          <div className="flex items-center gap-2 mt-4">
+            <div className="flex-1 h-9 rounded-full flex items-center px-4"
+              style={{ background: "#f0f0f0" }}>
+              <span className="font-golos text-xs flex-1" style={{ color: "#bbb" }}>далее</span>
+              <Icon name="ArrowRight" size={14} style={{ color: "#bbb" }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Иллюстрация */}
+        <div style={{ height: "240px" }}>
+          {slide.shapes}
+        </div>
+
+        {/* Лого НВД */}
+        <div className="px-5 pb-5 flex justify-end">
+          <div className="flex items-center gap-1.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: BRAND.red }}>
+              <span className="text-white font-unbounded font-black" style={{ fontSize: "7px", lineHeight: 1.1 }}>НВД</span>
+            </div>
+            <span className="font-unbounded font-black text-xs" style={{ color: "#111" }}>НЕ ВСЕ<br />ДОМА</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Точки-пагинация */}
+      <div className="flex gap-2 mt-8">
+        {ONBOARDING_SLIDES.map((_, i) => (
+          <button key={i} onClick={() => setIdx(i)}
+            className="rounded-full transition-all"
+            style={{
+              width: i === idx ? "24px" : "8px",
+              height: "8px",
+              background: i === idx ? BRAND.red : "#ddd",
+            }} />
+        ))}
+      </div>
+
+      {/* Кнопка */}
+      <button onClick={next}
+        className="mt-6 w-full max-w-xs py-4 rounded-2xl font-golos font-bold text-base text-white active:scale-95 transition-transform"
+        style={{ background: BRAND.red, maxWidth: "280px" }}>
+        {isLast ? "Начать →" : "Далее"}
+      </button>
+
+      {/* Пропустить */}
+      {!isLast && (
+        <button onClick={onDone}
+          className="mt-3 font-golos text-sm active:opacity-60"
+          style={{ color: "#aaa" }}>
+          Пропустить
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── BottomNav ────────────────────────────────────────────────────────────────
 const NAV_ITEMS: { tab: Tab; icon: string; label: string }[] = [
   { tab: "home", icon: "Home", label: "Главная" },
@@ -654,7 +811,18 @@ function BottomNav({ active, onNav }: { active: Tab; onNav: (t: Tab) => void }) 
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
+  const [onboarded, setOnboarded] = useState(false);
   const [tab, setTab] = useState<Tab>("home");
+
+  if (!onboarded) {
+    return (
+      <div style={{ background: "#f7f7f7", minHeight: "100vh" }} className="flex justify-center">
+        <div className="w-full max-w-sm flex flex-col" style={{ minHeight: "100dvh" }}>
+          <OnboardingScreen onDone={() => setOnboarded(true)} />
+        </div>
+      </div>
+    );
+  }
 
   const screen = {
     home: <HomeScreen onNav={setTab} />,
