@@ -417,80 +417,201 @@ function EventsScreen() {
 }
 
 // ─── ProfileScreen ───────────────────────────────────────────────────────────
-const FAMILY_MEMBERS = [
-  { name: "Мама", role: "Организатор", emoji: "👩", color: BRAND.red },
-  { name: "Папа", role: "Участник", emoji: "👨", color: BRAND.blue },
-  { name: "Аня", role: "Участник", emoji: "👧", color: BRAND.purple },
-  { name: "Миша", role: "Участник", emoji: "👦", color: BRAND.amber },
+const FAMILY_MEMBERS_INIT = [
+  { id: 1, name: "Мама", role: "Организатор", emoji: "👩", color: BRAND.red },
+  { id: 2, name: "Папа", role: "Участник", emoji: "👨", color: BRAND.blue },
+  { id: 3, name: "Аня", role: "Участник", emoji: "👧", color: BRAND.purple },
+  { id: 4, name: "Миша", role: "Участник", emoji: "👦", color: BRAND.amber },
 ];
 
+const PROFILE_EMOJIS = ["👩","👨","👧","👦","👴","👵","🧑","👶","🐱","🐶","🦊","🐼","🐸","🦁","🐯","🦄"];
+const PROFILE_COLORS = [BRAND.red, BRAND.blue, BRAND.purple, BRAND.amber, "#4caf7d", "#e67e7e", "#7eb8e6", "#a0a0a0"];
+
 function ProfileScreen() {
+  const [profile, setProfile] = useState({ name: "Мама", role: "Организатор игры", emoji: "👩", color: BRAND.red });
+  const [members, setMembers] = useState(FAMILY_MEMBERS_INIT);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(profile);
+  const [addingMember, setAddingMember] = useState(false);
+  const [newMember, setNewMember] = useState({ name: "", role: "Участник", emoji: "👦", color: BRAND.blue });
+
+  const saveProfile = () => { setProfile(draft); setEditing(false); };
+
+  const addMember = () => {
+    if (!newMember.name.trim()) return;
+    setMembers(prev => [...prev, { ...newMember, id: Date.now() }]);
+    setNewMember({ name: "", role: "Участник", emoji: "👦", color: BRAND.blue });
+    setAddingMember(false);
+  };
+
+  const removeMember = (id: number) => setMembers(prev => prev.filter(m => m.id !== id));
+
   return (
-    <div className="flex flex-col h-full px-5 pt-10 pb-4 animate-fade-in">
+    <div className="flex flex-col h-full px-5 pt-10 pb-4 animate-fade-in overflow-y-auto scrollbar-hide">
       {/* Заголовок */}
-      <div className="mb-6">
-        <p className="font-golos text-xs uppercase tracking-widest mb-1" style={{ color: "#999" }}>Аккаунт</p>
-        <h2 className="font-unbounded text-xl font-bold text-foreground">Профиль</h2>
+      <div className="mb-5">
+        <p className="font-golos text-xs mb-0.5" style={{ color: "#999" }}>Аккаунт</p>
+        <h2 className="font-golos font-black text-3xl text-foreground">Профиль</h2>
       </div>
 
       {/* Карточка профиля */}
-      <div className="rounded-2xl p-5 mb-5 flex items-center gap-4"
-        style={{ background: BRAND.red }}>
+      <div className="rounded-2xl p-5 mb-4 flex items-center gap-4"
+        style={{ background: profile.color }}>
         <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-3xl flex-shrink-0">
-          👩
+          {profile.emoji}
         </div>
         <div className="flex-1">
-          <p className="font-unbounded font-bold text-white text-lg leading-tight">Мама</p>
-          <p className="font-golos text-sm text-white/70 mt-0.5">Организатор игры</p>
+          <p className="font-golos font-black text-white text-xl leading-tight">{profile.name}</p>
+          <p className="font-golos text-sm text-white/70 mt-0.5">{profile.role}</p>
         </div>
-        <button className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center active:scale-90 transition-transform">
+        <button onClick={() => { setDraft(profile); setEditing(true); }}
+          className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center active:scale-90 transition-transform">
           <Icon name="Pencil" size={16} className="text-white" />
         </button>
       </div>
 
+      {/* Форма редактирования */}
+      {editing && (
+        <div className="rounded-2xl p-4 mb-4 animate-scale-in"
+          style={{ background: "#fff", border: "1.5px solid #e8e8e8", boxShadow: "0 2px 16px rgba(0,0,0,0.07)" }}>
+          <p className="font-golos font-bold text-sm mb-3">Редактировать профиль</p>
+
+          <input value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
+            placeholder="Имя"
+            className="w-full rounded-xl px-3 py-2.5 text-sm font-golos mb-2 outline-none"
+            style={{ background: "#f7f7f7", border: "1.5px solid #e0e0e0", color: "#111" }} />
+          <input value={draft.role} onChange={e => setDraft(d => ({ ...d, role: e.target.value }))}
+            placeholder="Роль (напр. Организатор игры)"
+            className="w-full rounded-xl px-3 py-2.5 text-sm font-golos mb-3 outline-none"
+            style={{ background: "#f7f7f7", border: "1.5px solid #e0e0e0", color: "#111" }} />
+
+          <p className="font-golos text-xs font-semibold mb-2" style={{ color: "#999" }}>Аватар</p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {PROFILE_EMOJIS.map(em => (
+              <button key={em} onClick={() => setDraft(d => ({ ...d, emoji: em }))}
+                className="w-9 h-9 rounded-xl text-xl flex items-center justify-center transition-transform active:scale-90"
+                style={{ background: draft.emoji === em ? `${draft.color}20` : "#f5f5f5", border: draft.emoji === em ? `2px solid ${draft.color}` : "2px solid transparent" }}>
+                {em}
+              </button>
+            ))}
+          </div>
+
+          <p className="font-golos text-xs font-semibold mb-2" style={{ color: "#999" }}>Цвет карточки</p>
+          <div className="flex gap-2 mb-4">
+            {PROFILE_COLORS.map(c => (
+              <button key={c} onClick={() => setDraft(d => ({ ...d, color: c }))}
+                className="w-7 h-7 rounded-full flex-shrink-0 transition-transform active:scale-90"
+                style={{ background: c, border: draft.color === c ? "2.5px solid #111" : "2.5px solid transparent", outline: draft.color === c ? "2px solid white" : "none", outlineOffset: "-3px" }} />
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={() => setEditing(false)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-golos font-bold"
+              style={{ background: "#f0f0f0", color: "#555" }}>
+              Отмена
+            </button>
+            <button onClick={saveProfile}
+              className="flex-1 py-2.5 rounded-xl text-sm font-golos font-bold text-white"
+              style={{ background: profile.color }}>
+              Сохранить
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Статистика */}
       <div className="grid grid-cols-3 gap-2 mb-5">
-        {[
-          { label: "Игр", value: "24" },
-          { label: "Дней", value: "18" },
-          { label: "Событий", value: "7" },
-        ].map(s => (
+        {[{ label: "Игр", value: "24" }, { label: "Дней", value: "18" }, { label: "Событий", value: "7" }].map(s => (
           <div key={s.label} className="rounded-2xl p-3 text-center"
             style={{ background: "#f5f5f5", border: "1.5px solid #eee" }}>
-            <p className="font-unbounded font-black text-xl" style={{ color: "#111" }}>{s.value}</p>
+            <p className="font-golos font-black text-xl" style={{ color: "#111" }}>{s.value}</p>
             <p className="font-golos text-xs mt-0.5" style={{ color: "#999" }}>{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* Члены семьи */}
-      <p className="font-golos text-sm font-bold uppercase tracking-widest mb-3" style={{ color: "#111" }}>Моя семья</p>
-      <div className="space-y-2 flex-1">
-        {FAMILY_MEMBERS.map((m, i) => (
-          <div key={m.name}
+      <p className="font-golos text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#999" }}>Моя семья</p>
+      <div className="space-y-2">
+        {members.map((m, i) => (
+          <div key={m.id}
             className="flex items-center gap-3 rounded-2xl px-4 py-3 animate-slide-up"
-            style={{ background: "#fff", border: "1.5px solid #e8e8e8", animationDelay: `${i * 60}ms` }}>
+            style={{ background: "#fff", border: "1.5px solid #e8e8e8", animationDelay: `${i * 50}ms` }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-              style={{ background: `${m.color}15` }}>
+              style={{ background: `${m.color}18` }}>
               {m.emoji}
             </div>
             <div className="flex-1">
               <p className="font-golos font-semibold text-sm text-foreground">{m.name}</p>
               <p className="font-golos text-xs" style={{ color: "#aaa" }}>{m.role}</p>
             </div>
-            <div className="w-2 h-2 rounded-full" style={{ background: m.color }} />
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: m.color }} />
+              <button onClick={() => removeMember(m.id)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center active:scale-90 transition-transform"
+                style={{ background: "#f5f5f5" }}>
+                <Icon name="X" size={13} style={{ color: "#bbb" }} />
+              </button>
+            </div>
           </div>
         ))}
 
-        {/* Добавить */}
-        <button className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 active:scale-95 transition-transform"
-          style={{ border: "1.5px dashed #ddd", background: "transparent" }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: "#f5f5f5" }}>
-            <Icon name="Plus" size={18} style={{ color: "#bbb" }} />
+        {/* Форма добавления */}
+        {addingMember && (
+          <div className="rounded-2xl p-4 animate-scale-in"
+            style={{ background: "#fff", border: "1.5px solid #e8e8e8" }}>
+            <input value={newMember.name} onChange={e => setNewMember(d => ({ ...d, name: e.target.value }))}
+              placeholder="Имя участника"
+              className="w-full rounded-xl px-3 py-2.5 text-sm font-golos mb-2 outline-none"
+              style={{ background: "#f7f7f7", border: "1.5px solid #e0e0e0", color: "#111" }} />
+            <input value={newMember.role} onChange={e => setNewMember(d => ({ ...d, role: e.target.value }))}
+              placeholder="Роль"
+              className="w-full rounded-xl px-3 py-2.5 text-sm font-golos mb-3 outline-none"
+              style={{ background: "#f7f7f7", border: "1.5px solid #e0e0e0", color: "#111" }} />
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {PROFILE_EMOJIS.slice(0, 8).map(em => (
+                <button key={em} onClick={() => setNewMember(d => ({ ...d, emoji: em }))}
+                  className="w-9 h-9 rounded-xl text-xl flex items-center justify-center"
+                  style={{ background: newMember.emoji === em ? "#f0f0f0" : "#fafafa", border: newMember.emoji === em ? "2px solid #333" : "2px solid transparent" }}>
+                  {em}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-1.5 mb-3">
+              {PROFILE_COLORS.map(c => (
+                <button key={c} onClick={() => setNewMember(d => ({ ...d, color: c }))}
+                  className="w-6 h-6 rounded-full flex-shrink-0"
+                  style={{ background: c, border: newMember.color === c ? "2.5px solid #111" : "2.5px solid transparent" }} />
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setAddingMember(false)}
+                className="flex-1 py-2 rounded-xl text-sm font-golos font-bold"
+                style={{ background: "#f0f0f0", color: "#555" }}>
+                Отмена
+              </button>
+              <button onClick={addMember}
+                className="flex-1 py-2 rounded-xl text-sm font-golos font-bold text-white"
+                style={{ background: BRAND.red }}>
+                Добавить
+              </button>
+            </div>
           </div>
-          <p className="font-golos text-sm font-medium" style={{ color: "#bbb" }}>Добавить участника</p>
-        </button>
+        )}
+
+        {/* Кнопка добавить */}
+        {!addingMember && (
+          <button onClick={() => setAddingMember(true)}
+            className="w-full flex items-center gap-3 rounded-2xl px-4 py-3 active:scale-95 transition-transform"
+            style={{ border: "1.5px dashed #ddd", background: "transparent" }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: "#f5f5f5" }}>
+              <Icon name="Plus" size={18} style={{ color: "#bbb" }} />
+            </div>
+            <p className="font-golos text-sm font-medium" style={{ color: "#bbb" }}>Добавить участника</p>
+          </button>
+        )}
       </div>
     </div>
   );
