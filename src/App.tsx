@@ -85,10 +85,75 @@ function GeometricBg() {
   );
 }
 
+// ─── Widgets ─────────────────────────────────────────────────────────────────
+const WIDGETS = [
+  {
+    id: "mood",
+    tab: "mood" as Tab,
+    title: "ПОДЕЛИСЬ\nСВОИМ\nНАСТРОЕНИЕМ",
+    bg: "#fff",
+    accent: BRAND.red,
+    shapes: (
+      <>
+        <div className="absolute bottom-0 left-2 w-12 h-12 rounded-sm rotate-12"
+          style={{ background: BRAND.red, opacity: 0.9 }} />
+        <div className="absolute bottom-4 left-14 w-9 h-9 rounded-full"
+          style={{ background: BRAND.blue }} />
+        <div className="absolute bottom-1 right-2 w-7 h-7"
+          style={{ background: BRAND.purple, clipPath: "polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)", borderRadius: "3px" }} />
+        <div className="absolute bottom-8 left-4 w-8 h-0 border-t-[32px] border-l-[16px] border-r-[16px]"
+          style={{ borderTopColor: BRAND.amber, borderLeftColor: "transparent", borderRightColor: "transparent" }} />
+      </>
+    ),
+  },
+  {
+    id: "moments",
+    tab: "events" as Tab,
+    title: "ОТОРВИ\nОТЦА\nОТ ЭКРАНА",
+    bg: "#fff",
+    accent: BRAND.blue,
+    shapes: (
+      <>
+        <div className="absolute bottom-0 right-0 w-20 h-16 rounded-tl-2xl"
+          style={{ background: BRAND.red }} />
+        <div className="absolute bottom-7 right-14 w-0 h-0 border-t-[28px] border-l-[14px] border-r-[14px]"
+          style={{ borderTopColor: BRAND.amber, borderLeftColor: "transparent", borderRightColor: "transparent" }} />
+        <svg className="absolute bottom-0 right-3" width="44" height="16" viewBox="0 0 44 16">
+          <path d="M4 0 Q6 12 8 14" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M16 0 Q16 12 14 14" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M28 0 Q30 12 32 14" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M36 0 Q36 12 34 14" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      </>
+    ),
+  },
+  {
+    id: "cards",
+    tab: "cards" as Tab,
+    title: "ЗАГРУЗИ\nПАМЯТНЫЕ\nМОМЕНТЫ",
+    bg: "#fff",
+    accent: BRAND.purple,
+    shapes: (
+      <>
+        <div className="absolute bottom-0 left-0 right-0 h-14 rounded-b-2xl"
+          style={{ background: BRAND.red }} />
+        <div className="absolute bottom-10 left-4 w-0 h-0 border-t-[36px] border-l-[18px] border-r-[18px]"
+          style={{ borderTopColor: BRAND.amber, borderLeftColor: "transparent", borderRightColor: "transparent" }} />
+        <svg className="absolute bottom-0 left-6" width="48" height="14" viewBox="0 0 48 14">
+          <path d="M6 0 Q8 10 10 12" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M18 0 Q18 10 16 12" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M30 0 Q32 10 34 12" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M40 0 Q40 10 38 12" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </svg>
+      </>
+    ),
+  },
+];
+
 // ─── HomeScreen ──────────────────────────────────────────────────────────────
 function HomeScreen({ onNav }: { onNav: (t: Tab) => void }) {
   return (
-    <div className="flex flex-col px-5 pt-10 pb-4 animate-fade-in gap-6">
+    <div className="flex flex-col px-5 pt-10 pb-4 animate-fade-in gap-6 overflow-y-auto scrollbar-hide">
       {/* Заголовок */}
       <div>
         <p className="font-golos text-xs uppercase tracking-widest mb-1" style={{ color: "#999" }}>Добро пожаловать</p>
@@ -100,8 +165,8 @@ function HomeScreen({ onNav }: { onNav: (t: Tab) => void }) {
       {/* Hero карточка */}
       <div className="rounded-2xl p-5"
         style={{ border: "1.5px solid #e0e0e0", background: "#fff", boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
-        <p className="font-golos text-sm mb-0.5" style={{ color: "#888" }}>Сегодня 21 марта 2026</p>
-        <p className="font-golos font-bold text-xl mb-1 text-foreground">Суббота!</p>
+        <p className="font-golos text-sm mb-0.5" style={{ color: "#888" }}>Сегодня 25 марта 2026</p>
+        <p className="font-golos font-bold text-xl mb-1 text-foreground">Среда!</p>
         <p className="font-golos text-sm mb-4" style={{ color: "#888" }}>Отличный день для игры с семьёй</p>
         <button onClick={() => onNav("cards")}
           className="px-6 py-2.5 rounded-xl font-golos font-semibold text-sm text-white active:scale-95 transition-transform"
@@ -110,9 +175,49 @@ function HomeScreen({ onNav }: { onNav: (t: Tab) => void }) {
         </button>
       </div>
 
+      {/* Виджеты */}
+      <div>
+        <p className="font-golos text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#999" }}>Быстрые действия</p>
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-5 px-5">
+          {WIDGETS.map((w) => (
+            <button key={w.id} onClick={() => onNav(w.tab)}
+              className="flex-shrink-0 rounded-3xl overflow-hidden active:scale-95 transition-transform text-left"
+              style={{
+                width: "148px",
+                height: "210px",
+                background: w.bg,
+                border: "1.5px solid #e8e8e8",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                position: "relative",
+              }}>
+              {/* Текст */}
+              <div className="absolute top-0 left-0 right-0 p-4">
+                <p className="font-unbounded font-black text-sm leading-tight text-foreground whitespace-pre-line">{w.title}</p>
+              </div>
+              {/* Кнопка-стрелка */}
+              <div className="absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center"
+                style={{ background: "#f0f0f0" }}>
+                <Icon name="ArrowRight" size={12} style={{ color: "#aaa" }} />
+              </div>
+              {/* Иллюстрация */}
+              <div className="absolute bottom-0 left-0 right-0 h-20">
+                {w.shapes}
+              </div>
+              {/* Лого */}
+              <div className="absolute bottom-3 right-3 z-10">
+                <div className="w-6 h-6 rounded-md flex items-center justify-center"
+                  style={{ background: BRAND.red }}>
+                  <span className="text-white font-unbounded font-black" style={{ fontSize: "6px", lineHeight: 1 }}>НВД</span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Разделы */}
       <div>
-        <p className="font-golos text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#111" }}>Разделы</p>
+        <p className="font-golos text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#999" }}>Разделы</p>
         <div className="grid grid-cols-2 gap-3">
           {[
             { tab: "mood" as Tab, label: "Настроение", sub: "История настроений", bg: BRAND.blue },
